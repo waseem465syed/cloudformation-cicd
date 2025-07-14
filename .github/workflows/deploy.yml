@@ -1,17 +1,26 @@
-name: Deploy Portfolio Website to S3
+name: Deploy Website to S3
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main   # Trigger only on main branch push
 
 jobs:
   deploy:
+    name: Sync website with S3
     runs-on: ubuntu-latest
 
     steps:
-      - name: hello 
-        run: echo "hello from github actions"
-       
+      - name: Checkout source code
+        uses: actions/checkout@v3
 
-      - name: rep name
-        run: echo "this workflow is running in ${{github.respository}}"
+      - name: Set up AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2     # Replace with your region if different
+
+      - name: Deploy to S3
+        run: |
+          aws s3 sync ./website s3://waseem-portfolio-website-bucket --delete
